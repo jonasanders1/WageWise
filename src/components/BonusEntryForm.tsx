@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { useIncome } from '@/context/IncomeContext';
-import { BonusEntry } from '@/types/income';
+import { useData } from '@/context/DataContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,13 +8,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { toast } from '@/hooks/use-toast';
 
 const BonusEntryForm: React.FC = () => {
-  const { addBonus } = useIncome();
+  const { addBonus } = useData();
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [projectName, setProjectName] = useState('');
   const [amount, setAmount] = useState(0);
   const [description, setDescription] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!date || !projectName || amount <= 0) {
@@ -27,21 +26,22 @@ const BonusEntryForm: React.FC = () => {
       return;
     }
 
-    const newBonus: BonusEntry = {
-      id: Date.now().toString(),
-      date,
-      projectName,
-      amount,
-      description
-    };
-
-    addBonus(newBonus);
-    
-    // Reset form
-    setDate(new Date().toISOString().split('T')[0]);
-    setProjectName('');
-    setAmount(0);
-    setDescription('');
+    try {
+      await addBonus({
+        date,
+        projectName,
+        amount,
+        description
+      });
+      
+      // Reset form
+      setDate(new Date().toISOString().split('T')[0]);
+      setProjectName('');
+      setAmount(0);
+      setDescription('');
+    } catch (err) {
+      console.error('Failed to add bonus:', err);
+    }
   };
 
   return (

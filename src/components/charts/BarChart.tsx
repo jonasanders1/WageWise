@@ -46,12 +46,12 @@ const BarChart: React.FC<BarChartProps> = ({
   layout = 'horizontal',
 }) => {
   const { theme } = useTheme();
-  const isDark = theme === 'dark';
+  const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
-  // Theme-aware colors
+  // Theme-aware colors with stronger contrast
   const gridColor = isDark ? 'rgba(255,255,255,0.1)' : '#f0f0f0';
   const axisColor = isDark ? 'rgba(255,255,255,0.2)' : '#e0e0e0';
-  const textColor = isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)';
+  const textColor = isDark ? 'rgba(255,255,255,0.87)' : 'rgba(0,0,0,0.87)';
 
   const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
     if (active && payload && payload.length) {
@@ -91,79 +91,40 @@ const BarChart: React.FC<BarChartProps> = ({
   };
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full">
       <ResponsiveContainer width="100%" height={height}>
-        <RechartsBarChart 
-          data={data} 
+        <RechartsBarChart
+          data={data}
           layout={layout}
-          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+          margin={{ top: 20, right: 30, left: 30, bottom: 20 }}
         >
-          <CartesianGrid 
-            strokeDasharray="3 3" 
-            stroke={gridColor} 
-            horizontal={layout === 'vertical'} 
-            vertical={layout === 'horizontal'} 
+          <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+          <XAxis
+            dataKey={xAxisDataKey}
+            stroke={axisColor}
+            tick={{ fill: textColor, fontSize: 12 }}
+            axisLine={{ stroke: axisColor }}
           />
-          {layout === 'vertical' ? (
-            <>
-              <XAxis 
-                type="number"
-                tickFormatter={(value) => (currency ? `$${value}` : value.toString())}
-                tick={{ fontSize: 12, fill: textColor }}
-                tickLine={false}
-                axisLine={{ stroke: axisColor }}
-              />
-              <YAxis
-                dataKey={xAxisDataKey}
-                type="category"
-                tick={{ fontSize: 12, fill: textColor }}
-                tickLine={false}
-                axisLine={{ stroke: axisColor }}
-              />
-            </>
-          ) : (
-            <>
-              <XAxis
-                dataKey={xAxisDataKey}
-                tick={{ fontSize: 12, fill: textColor }}
-                tickLine={false}
-                axisLine={{ stroke: axisColor }}
-              />
-              <YAxis
-                tickFormatter={(value) => (currency ? `$${value}` : value.toString())}
-                tick={{ fontSize: 12, fill: textColor }}
-                tickLine={false}
-                axisLine={{ stroke: axisColor }}
-              />
-            </>
-          )}
-          <Tooltip 
-            content={<CustomTooltip />}
-            cursor={{ fill: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }}
+          <YAxis
+            stroke={axisColor}
+            tick={{ fill: textColor, fontSize: 12 }}
+            axisLine={{ stroke: axisColor }}
+            tickFormatter={value => currency ? formatCurrency(value) : value.toString()}
           />
+          <Tooltip content={<CustomTooltip />} />
           <Legend
-            formatter={(value) => {
-              return <span className="text-sm text-foreground">{value}</span>;
+            wrapperStyle={{
+              color: textColor,
+              fontSize: '12px'
             }}
           />
-          {keys.map((k) => (
+          {keys.map((item, index) => (
             <Bar
-              key={k.key}
-              dataKey={k.key}
-              name={k.name}
-              stackId="a"
-              fill={k.color}
-              radius={layout === 'vertical' ? [0, 4, 4, 0] : [4, 4, 0, 0]}
-              animationDuration={1000}
-              // Add hover effect
-              onMouseEnter={(data, index, e) => {
-                (e.target as HTMLElement).style.opacity = '0.8';
-                (e.target as HTMLElement).style.transition = 'opacity 0.2s ease';
-              }}
-              onMouseLeave={(data, index, e) => {
-                (e.target as HTMLElement).style.opacity = '1';
-                (e.target as HTMLElement).style.transition = 'opacity 0.2s ease';
-              }}
+              key={item.key}
+              dataKey={item.key}
+              fill={item.color}
+              name={item.name}
+              stackId="stack"
             />
           ))}
         </RechartsBarChart>

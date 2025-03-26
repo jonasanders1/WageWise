@@ -1,21 +1,26 @@
 import React from 'react';
-import { useIncome } from '@/context/IncomeContext';
+import { useData } from "@/context/DataContext";
 import { getMonthlySummaries, getYearlySummaries, formatCurrency, formatHours, getTotalStats } from '@/utils/incomeCalculator';
 import StatisticCard from './StatisticCard';
 import { DollarSign, Clock, Briefcase, TrendingUp } from 'lucide-react';
 
 const Stats: React.FC = () => {
-  const { entries, bonuses } = useIncome();
+  const { entries, loading, error } = useData();
   
-  const monthlySummaries = getMonthlySummaries(entries, bonuses);
-  const yearlySummaries = getYearlySummaries(entries, bonuses);
-  const totals = getTotalStats(entries, bonuses);
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+  
+  const monthlySummaries = getMonthlySummaries(entries, []);
+  const yearlySummaries = getYearlySummaries(entries, []);
+  const totals = getTotalStats(entries, []);
 
   // Get unique projects
-  const uniqueProjects = new Set([
-    ...entries.map(entry => entry.projectName),
-    ...bonuses.map(bonus => bonus.projectName)
-  ]);
+  const uniqueProjects = new Set(entries.map(entry => entry.projectName));
 
   // Calculate this month vs last month for percentage change
   const getPercentageChange = (currentValue: number, previousValue: number) => {

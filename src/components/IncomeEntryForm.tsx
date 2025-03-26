@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useIncome } from '@/context/IncomeContext';
+import { useData } from '@/context/DataContext';
 import { IncomeEntry } from '@/types/income';
 import { calculatePayment } from '@/utils/incomeCalculator';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ const DEFAULT_STANDARD_HOURS = 1;
 const DEFAULT_OVERTIME_RATE = 16;
 
 const IncomeEntryForm: React.FC = () => {
-  const { addEntry } = useIncome();
+  const { addEntry } = useData();
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [projectName, setProjectName] = useState('');
   const [payRate, setPayRate] = useState(30);
@@ -20,7 +20,7 @@ const IncomeEntryForm: React.FC = () => {
   const [standardHours, setStandardHours] = useState(DEFAULT_STANDARD_HOURS);
   const [overtimeRate, setOvertimeRate] = useState(DEFAULT_OVERTIME_RATE);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!date || !projectName || payRate <= 0 || timeSpent <= 0) {
@@ -34,26 +34,27 @@ const IncomeEntryForm: React.FC = () => {
 
     const payment = calculatePayment(timeSpent, standardHours, payRate, overtimeRate);
     
-    const newEntry: IncomeEntry = {
-      id: Date.now().toString(),
-      date,
-      projectName,
-      payRate,
-      timeSpent,
-      standardHours,
-      overtimeRate,
-      regularPay: payment.regularPay,
-      overtimePay: payment.overtimePay,
-      totalPay: payment.totalPay,
-    };
-
-    addEntry(newEntry);
-    
-    // Reset form (except for default values)
-    setDate(new Date().toISOString().split('T')[0]);
-    setProjectName('');
-    setPayRate(30);
-    setTimeSpent(1);
+    try {
+      await addEntry({
+        date,
+        projectName,
+        payRate,
+        timeSpent,
+        standardHours,
+        overtimeRate,
+        regularPay: payment.regularPay,
+        overtimePay: payment.overtimePay,
+        totalPay: payment.totalPay,
+      });
+      
+      // Reset form
+      setDate(new Date().toISOString().split('T')[0]);
+      setProjectName('');
+      setPayRate(30);
+      setTimeSpent(1);
+    } catch (err) {
+      console.error('Failed to add entry:', err);
+    }
   };
 
   // Preview calculation

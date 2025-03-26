@@ -1,20 +1,39 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { useTheme } from '@/hooks/useTheme';
-import { toast } from '@/hooks/use-toast';
-import { Paintbrush, Moon, Sun, Monitor, Sliders, Palette, BarChart2 } from 'lucide-react';
-import ColorSelector from './ColorSelector';
-import PreviewBarChart from '@/components/charts/PreviewBarChart';
-import { defaultColors } from '@/types/theme';
+import React, { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { useTheme } from "@/hooks/useTheme";
+import { toast } from "@/hooks/use-toast";
+import {
+  Paintbrush,
+  Moon,
+  Sun,
+  Monitor,
+  Sliders,
+  Palette,
+  BarChart2,
+  User,
+} from "lucide-react";
+import ColorSelector from "./ColorSelector";
+import PreviewBarChart from "@/components/charts/PreviewBarChart";
+import { defaultColors } from "@/types/theme";
+import { signOut } from "firebase/auth";
+import { auth } from "@/firebaseConfig";
+import { useAuth } from "@/context/AuthContext";
+
 const Settings: React.FC = () => {
   const { theme, colors, setTheme, setColors } = useTheme();
+  const { user } = useAuth();
   const [localColors, setLocalColors] = useState(colors);
-  const [activeTab, setActiveTab] = useState('appearance');
-
+  const [activeTab, setActiveTab] = useState("appearance");
   const handleSave = () => {
     setColors(localColors);
     toast({
@@ -34,11 +53,11 @@ const Settings: React.FC = () => {
 
   const previewData = [
     {
-      name: 'Example',
+      name: "Example",
       regularPay: 2000,
       overtimePay: 800,
       bonusPay: 500,
-    }
+    },
   ];
 
   return (
@@ -52,7 +71,11 @@ const Settings: React.FC = () => {
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="space-y-6"
+      >
         <TabsList>
           <TabsTrigger value="appearance" className="flex items-center gap-2">
             <Paintbrush size={16} />
@@ -61,6 +84,10 @@ const Settings: React.FC = () => {
           <TabsTrigger value="preferences" className="flex items-center gap-2">
             <Sliders size={16} />
             <span>Preferences</span>
+          </TabsTrigger>
+          <TabsTrigger value="account" className="flex items-center gap-2">
+            <User size={16} />
+            <span>Account</span>
           </TabsTrigger>
         </TabsList>
 
@@ -79,25 +106,25 @@ const Settings: React.FC = () => {
               <div className="grid gap-4">
                 <div className="grid grid-cols-3 gap-4">
                   <Button
-                    variant={theme === 'light' ? 'default' : 'outline'}
+                    variant={theme === "light" ? "default" : "outline"}
                     className="w-full"
-                    onClick={() => setTheme('light')}
+                    onClick={() => setTheme("light")}
                   >
                     <Sun className="mr-2 h-4 w-4" />
                     Light
                   </Button>
                   <Button
-                    variant={theme === 'dark' ? 'default' : 'outline'}
+                    variant={theme === "dark" ? "default" : "outline"}
                     className="w-full"
-                    onClick={() => setTheme('dark')}
+                    onClick={() => setTheme("dark")}
                   >
                     <Moon className="mr-2 h-4 w-4" />
                     Dark
                   </Button>
                   <Button
-                    variant={theme === 'system' ? 'default' : 'outline'}
+                    variant={theme === "system" ? "default" : "outline"}
                     className="w-full"
-                    onClick={() => setTheme('system')}
+                    onClick={() => setTheme("system")}
                   >
                     <Monitor className="mr-2 h-4 w-4" />
                     System
@@ -124,45 +151,61 @@ const Settings: React.FC = () => {
                     <ColorSelector
                       id="regularColor"
                       color={localColors.regularPay}
-                      onChange={(value) => setLocalColors(prev => ({
-                        ...prev,
-                        regularPay: value
-                      }))}
+                      onChange={(value) =>
+                        setLocalColors((prev) => ({
+                          ...prev,
+                          regularPay: value,
+                        }))
+                      }
                     />
-                    <Label htmlFor="regularColor" className="text-sm">Regular Pay</Label>
+                    <Label htmlFor="regularColor" className="text-sm">
+                      Regular Pay
+                    </Label>
                   </div>
                   <div className="flex items-center gap-2">
                     <ColorSelector
                       id="overtimeColor"
                       color={localColors.overtimePay}
-                      onChange={(value) => setLocalColors(prev => ({
-                        ...prev,
-                        overtimePay: value
-                      }))}
+                      onChange={(value) =>
+                        setLocalColors((prev) => ({
+                          ...prev,
+                          overtimePay: value,
+                        }))
+                      }
                     />
-                    <Label htmlFor="overtimeColor" className="text-sm">Overtime Pay</Label>
+                    <Label htmlFor="overtimeColor" className="text-sm">
+                      Overtime Pay
+                    </Label>
                   </div>
                   <div className="flex items-center gap-2">
                     <ColorSelector
                       id="bonusColor"
                       color={localColors.bonusPay}
-                      onChange={(value) => setLocalColors(prev => ({
-                        ...prev,
-                        bonusPay: value
-                      }))}
+                      onChange={(value) =>
+                        setLocalColors((prev) => ({
+                          ...prev,
+                          bonusPay: value,
+                        }))
+                      }
                     />
-                    <Label htmlFor="bonusColor" className="text-sm">Bonus Pay</Label>
+                    <Label htmlFor="bonusColor" className="text-sm">
+                      Bonus Pay
+                    </Label>
                   </div>
                   <div className="flex items-center gap-2">
                     <ColorSelector
                       id="hoursColor"
                       color={localColors.hoursWorked}
-                      onChange={(value) => setLocalColors(prev => ({
-                        ...prev,
-                        hoursWorked: value
-                      }))}
+                      onChange={(value) =>
+                        setLocalColors((prev) => ({
+                          ...prev,
+                          hoursWorked: value,
+                        }))
+                      }
                     />
-                    <Label htmlFor="hoursColor" className="text-sm">Hours Worked</Label>
+                    <Label htmlFor="hoursColor" className="text-sm">
+                      Hours Worked
+                    </Label>
                   </div>
                 </div>
 
@@ -173,7 +216,7 @@ const Settings: React.FC = () => {
                       Chart Preview
                     </div>
                   </div>
-                  
+
                   <PreviewBarChart colors={localColors} />
                 </div>
               </div>
@@ -200,22 +243,68 @@ const Settings: React.FC = () => {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="defaultPayRate">Default Pay Rate ($)</Label>
-                  <Input 
-                    id="defaultPayRate" 
-                    type="number" 
+                  <Input
+                    id="defaultPayRate"
+                    type="number"
                     placeholder="$30"
                     className="h-10"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="defaultOvertimeRate">Default Overtime Rate ($)</Label>
-                  <Input 
-                    id="defaultOvertimeRate" 
-                    type="number" 
+                  <Label htmlFor="defaultOvertimeRate">
+                    Default Overtime Rate ($)
+                  </Label>
+                  <Input
+                    id="defaultOvertimeRate"
+                    type="number"
                     placeholder="$16"
                     className="h-10"
                   />
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="account" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Account Settings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="example@email.com"
+                    className="h-10"
+                    value={user?.email || ""}
+                    disabled
+                  />
+                </div>
+              </div>
+              <div className="mt-6">
+                <Button
+                  variant="destructive"
+                  onClick={async () => {
+                    try {
+                      await signOut(auth);
+                      toast({
+                        title: "Logged out successfully",
+                        description: "You have been logged out.",
+                      });
+                    } catch (error) {
+                      toast({
+                        title: "Failed to log out",
+                        description: "Please try again.",
+                      });
+                    }
+                  }}
+                >
+                  Log Out
+                </Button>
               </div>
             </CardContent>
           </Card>

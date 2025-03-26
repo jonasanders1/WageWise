@@ -1,13 +1,13 @@
 import React from 'react';
-import { useIncome } from '@/context/IncomeContext';
 import { formatCurrency } from '@/utils/incomeCalculator';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trash2 } from 'lucide-react';
+import { useData } from '@/context/DataContext';
 
 const BonusTable: React.FC = () => {
-  const { bonuses, deleteBonus } = useIncome();
+  const { bonuses, deleteBonus } = useData();
 
   // Sort bonuses by date (newest first)
   const sortedBonuses = [...bonuses].sort((a, b) => 

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useIncome } from '@/context/IncomeContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -7,12 +6,13 @@ import { formatCurrency, formatHours } from '@/utils/incomeCalculator';
 import { Trash2, ArrowUpDown } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
+import { useData } from '@/context/DataContext';
 
 type SortField = 'date' | 'projectName' | 'payRate' | 'timeSpent' | 'totalPay';
 type SortDirection = 'asc' | 'desc';
 
 const IncomeTable: React.FC = () => {
-  const { entries, deleteEntry } = useIncome();
+  const { entries, deleteEntry } = useData();
   const [sortField, setSortField] = useState<SortField>('date');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [search, setSearch] = useState('');
