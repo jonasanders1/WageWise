@@ -12,7 +12,7 @@ interface PreviewBarChartProps {
 const PreviewBarChart: React.FC<PreviewBarChartProps> = ({ colors }) => {
   // Mock data for preview - using single entry for cleaner vertical preview
   const previewData = [
-    { 
+    {          
       name: 'Jan',
       regularPay: 2000,
       overtimePay: 800,

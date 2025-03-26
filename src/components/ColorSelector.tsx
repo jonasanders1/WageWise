@@ -1,6 +1,6 @@
 const ColorSelector = ({ color, onChange, id }: { color: string; onChange: (value: string) => void; id: string; }) => {
   return (
-    <div className="relative w-fit">
+    <label htmlFor={id} className="relative w-fit flex items-center cursor-pointer">
       <input 
         id={id}
         type="color" 
@@ -9,10 +9,10 @@ const ColorSelector = ({ color, onChange, id }: { color: string; onChange: (valu
         className="absolute inset-0 opacity-0 cursor-pointer"
       />
       <div 
-        className="h-12 w-12 rounded-full border-2 border-white cursor-pointer hover:opacity-90 transition-opacity"
+        className="h-12 w-12 rounded-full border-2 border-white hover:opacity-90 transition-opacity"
         style={{ backgroundColor: color }}
       />
-    </div>
+    </label>
   )
 }
 
