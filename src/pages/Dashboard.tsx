@@ -56,7 +56,7 @@ const Dashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container mx-auto py-8 px-4 max-w-7xl space-y-8 animate-fade-in">
+      <div className="container mx-auto py-8 px-4 max-w-[1400px] space-y-8 animate-fade-in">
         <div className="flex flex-col items-center gap-6">
           <Tabs
             value={activeTab}
