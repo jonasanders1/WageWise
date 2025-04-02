@@ -1,39 +1,68 @@
-import React, { useState } from 'react';
-import { useData } from '@/context/DataContext';
-import { IncomeEntry } from '@/types/income';
-import { calculatePayment } from '@/utils/incomeCalculator';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from '@/hooks/use-toast';
+import React, { useState } from "react";
+import { useData } from "@/context/DataContext";
+import { IncomeEntry } from "@/types/income";
+import { calculatePayment } from "@/utils/incomeCalculator";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { toast } from "@/hooks/use-toast";
 
 const DEFAULT_STANDARD_HOURS = 1;
 const DEFAULT_OVERTIME_RATE = 16;
 
 const IncomeEntryForm: React.FC = () => {
   const { addEntry } = useData();
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [projectName, setProjectName] = useState('');
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [projectName, setProjectName] = useState("");
   const [payRate, setPayRate] = useState(30);
-  const [timeSpent, setTimeSpent] = useState(1);
+  const [duration, setDuration] = useState("00:00:00");
   const [standardHours, setStandardHours] = useState(DEFAULT_STANDARD_HOURS);
   const [overtimeRate, setOvertimeRate] = useState(DEFAULT_OVERTIME_RATE);
+
+  const convertToDecimalHours = (duration: string): number => {
+    const [hours, minutes, seconds] = duration.split(":").map(Number);
+    return hours + minutes / 60 + seconds / 3600;
+  };
+
+  const handleDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Allow empty input or valid time format (HH:MM:SS)
+    if (
+      value === "" ||
+      /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/.test(value)
+    ) {
+      setDuration(value);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!date || !projectName || payRate <= 0 || timeSpent <= 0) {
+    if (!date || !projectName || payRate <= 0 || duration === "00:00:00") {
       toast({
-        title: 'Missing Information',
-        description: 'Please fill in all required fields.',
-        variant: 'destructive',
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
       });
       return;
     }
 
-    const payment = calculatePayment(timeSpent, standardHours, payRate, overtimeRate);
-    
+    const timeSpent = convertToDecimalHours(duration);
+    const payment = calculatePayment(
+      timeSpent,
+      standardHours,
+      payRate,
+      overtimeRate
+    );
+
     try {
       await addEntry({
         date,
@@ -46,28 +75,32 @@ const IncomeEntryForm: React.FC = () => {
         overtimePay: payment.overtimePay,
         totalPay: payment.totalPay,
       });
-      
+
       // Reset form
-      setDate(new Date().toISOString().split('T')[0]);
-      setProjectName('');
+      setDate(new Date().toISOString().split("T")[0]);
+      setProjectName("");
       setPayRate(30);
-      setTimeSpent(1);
+      setDuration("00:00:00");
     } catch (err) {
-      console.error('Failed to add entry:', err);
+      console.error("Failed to add entry:", err);
     }
   };
 
   // Preview calculation
-  const payment = calculatePayment(timeSpent, standardHours, payRate, overtimeRate);
+  const timeSpent = convertToDecimalHours(duration);
+  const payment = calculatePayment(
+    timeSpent,
+    standardHours,
+    payRate,
+    overtimeRate
+  );
   const showPreview = projectName && payRate > 0 && timeSpent > 0;
 
   return (
     <Card className="w-full glass">
       <CardHeader>
         <CardTitle className="text-xl">Add New Income</CardTitle>
-        <CardDescription>
-          Enter details about your income
-        </CardDescription>
+        <CardDescription>Enter details about your income</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -108,15 +141,14 @@ const IncomeEntryForm: React.FC = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="timeSpent">Time Spent (hours)</Label>
+              <Label htmlFor="duration">Time Spent (HH:MM:SS)</Label>
               <Input
-                id="timeSpent"
-                type="number"
-                min="0.1"
-                step="0.1"
-                value={timeSpent}
-                onChange={(e) => setTimeSpent(parseFloat(e.target.value))}
-                className="transition-all"
+                id="duration"
+                type="time"
+                step="1"
+                value={duration}
+                onChange={handleDurationChange}
+                className="transition-all font-mono"
                 required
               />
             </div>
@@ -125,10 +157,11 @@ const IncomeEntryForm: React.FC = () => {
               <Input
                 id="standardHours"
                 type="number"
-                min="0.1"
-                step="0.1"
+                min="0"
                 value={standardHours}
-                onChange={(e) => setStandardHours(parseFloat(e.target.value))}
+                onChange={(e) =>
+                  setStandardHours(parseInt(e.target.value) || 0)
+                }
                 className="transition-all"
                 required
               />
@@ -154,11 +187,15 @@ const IncomeEntryForm: React.FC = () => {
               <div className="grid grid-cols-3 gap-4 text-sm">
                 <div>
                   <p className="text-muted-foreground">Regular Pay</p>
-                  <p className="font-medium">${payment.regularPay.toFixed(2)}</p>
+                  <p className="font-medium">
+                    ${payment.regularPay.toFixed(2)}
+                  </p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Overtime Pay</p>
-                  <p className="font-medium">${payment.overtimePay.toFixed(2)}</p>
+                  <p className="font-medium">
+                    ${payment.overtimePay.toFixed(2)}
+                  </p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Total</p>
@@ -169,7 +206,10 @@ const IncomeEntryForm: React.FC = () => {
           )}
 
           <CardFooter className="px-0 pt-2">
-            <Button type="submit" className="w-full bg-primary hover:bg-primary/90 transition-colors">
+            <Button
+              type="submit"
+              className="w-full bg-primary hover:bg-primary/90 transition-colors"
+            >
               Add Income Entry
             </Button>
           </CardFooter>

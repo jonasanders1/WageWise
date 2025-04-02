@@ -174,7 +174,18 @@ export const formatCurrency = (amount: number): string => {
 
 // Format hours
 export const formatHours = (hours: number): string => {
-  return `${hours.toFixed(1)}h`;
+  const totalSeconds = Math.round(hours * 3600);
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+
+  const parts = [];
+  if (h > 0) parts.push(`${h}h`);
+  if (m > 0) parts.push(`${m}m`);
+  if (s > 0) parts.push(`${s}s`);
+  if (parts.length === 0) return '0s';
+
+  return parts.join(' ');
 };
 
 // Get month name from YYYY-MM format
